@@ -3,33 +3,45 @@ import type { EnvironmentVariable } from '../types/rbac.types';
 
 interface VariablesState {
   variables: EnvironmentVariable[];
-  drawerOpen: boolean;
 }
 
 interface VariablesContextValue extends VariablesState {
-  setVariables: (keys: string[]) => void;
+  setVariablesFromExtracted: (extracted: EnvironmentVariable[]) => void;
+  loadVariables: (vars: { key: string; value: string }[]) => void;
   updateVariable: (key: string, value: string) => void;
-  openDrawer: () => void;
-  closeDrawer: () => void;
   clearVariables: () => void;
+  areRequiredVariablesFilled: () => boolean;
 }
 
 const VariablesContext = createContext<VariablesContextValue | null>(null);
 
 const initialState: VariablesState = {
   variables: [],
-  drawerOpen: false,
 };
 
 export function VariablesProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<VariablesState>(initialState);
 
-  const setVariables = (keys: string[]) => {
+  const setVariablesFromExtracted = (extracted: EnvironmentVariable[]) => {
     setState((prev) => {
       const existingValues = new Map(prev.variables.map((v) => [v.key, v.value]));
-      const newVariables = keys.map((key) => ({
-        key,
-        value: existingValues.get(key) ?? '',
+
+      const newVariables = extracted.map((v) => ({
+        ...v,
+        value: existingValues.get(v.key) ?? '',
+      }));
+
+      return { ...prev, variables: newVariables };
+    });
+  };
+
+  const loadVariables = (vars: { key: string; value: string }[]) => {
+    setState((prev) => {
+      const loadedValues = new Map(vars.map((v) => [v.key, v.value]));
+
+      const newVariables = prev.variables.map((v) => ({
+        ...v,
+        value: loadedValues.get(v.key) ?? v.value,
       }));
 
       return { ...prev, variables: newVariables };
@@ -45,25 +57,23 @@ export function VariablesProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const openDrawer = () => {
-    setState((prev) => ({ ...prev, drawerOpen: true }));
-  };
-
-  const closeDrawer = () => {
-    setState((prev) => ({ ...prev, drawerOpen: false }));
-  };
-
   const clearVariables = () => {
     setState(initialState);
   };
 
+  const areRequiredVariablesFilled = () => {
+    return state.variables
+      .filter((v) => v.isRequired)
+      .every((v) => v.value.trim().length > 0);
+  };
+
   const value: VariablesContextValue = {
     ...state,
-    setVariables,
+    setVariablesFromExtracted,
+    loadVariables,
     updateVariable,
-    openDrawer,
-    closeDrawer,
     clearVariables,
+    areRequiredVariablesFilled,
   };
 
   return (

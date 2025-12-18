@@ -3,20 +3,26 @@ import { CollectionProvider } from './context/CollectionContext';
 import { VariablesProvider } from './context/VariablesContext';
 import { RolesProvider } from './context/RolesContext';
 import { ResultsProvider } from './context/ResultsContext';
+import { StepProvider } from './context/StepContext';
+import { EnvironmentProvider } from './context/EnvironmentContext';
 import { ScannerPage } from './pages/ScannerPage';
 
 function App() {
   return (
-    <CollectionProvider>
-      <VariablesProvider>
-        <RolesProvider>
-          <ResultsProvider>
-            <ScannerPage />
-            <GeckoUIPortal />
-          </ResultsProvider>
-        </RolesProvider>
-      </VariablesProvider>
-    </CollectionProvider>
+    <StepProvider>
+      <CollectionProvider>
+        <VariablesProvider>
+          <RolesProvider>
+            <ResultsProvider>
+              <EnvironmentProvider>
+                <ScannerPage />
+                <GeckoUIPortal />
+              </EnvironmentProvider>
+            </ResultsProvider>
+          </RolesProvider>
+        </VariablesProvider>
+      </CollectionProvider>
+    </StepProvider>
   );
 }
 

@@ -20,6 +20,7 @@ export interface TreeNode {
 export interface EnvironmentVariable {
   key: string;
   value: string;
+  isRequired: boolean;
 }
 
 export interface Role {
@@ -39,3 +40,10 @@ export interface ScanResult {
 }
 
 export type ResultsMap = Map<string, ScanResult>;
+
+export interface SavedEnvironment {
+  name: string;
+  variables: { key: string; value: string }[];
+  roles: { name: string; token: string }[];
+  savedAt: number;
+}

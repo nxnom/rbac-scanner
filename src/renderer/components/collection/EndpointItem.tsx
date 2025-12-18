@@ -3,6 +3,7 @@ import { useCollection } from '../../context/CollectionContext';
 import { METHOD_COLORS } from '../../constants/constants';
 import type { TreeNode } from '../../types/rbac.types';
 import { classNames } from '../../utils/classNames';
+import { extractPathFromUrl } from '../../utils/variableExtractor';
 
 interface EndpointItemProps {
   node: TreeNode;
@@ -18,6 +19,7 @@ export function EndpointItem({ node, depth }: EndpointItemProps) {
   };
 
   const methodColor = node.method ? METHOD_COLORS[node.method] : '';
+  const displayPath = node.url ? extractPathFromUrl(node.url) : '';
 
   return (
     <div
@@ -29,7 +31,7 @@ export function EndpointItem({ node, depth }: EndpointItemProps) {
       {node.method && (
         <span
           className={classNames(
-            'text-xs font-medium px-1.5 py-0.5 rounded',
+            'text-xs font-medium px-1.5 py-0.5 rounded shrink-0',
             methodColor
           )}
         >
@@ -37,11 +39,11 @@ export function EndpointItem({ node, depth }: EndpointItemProps) {
         </span>
       )}
 
-      <span className="text-sm truncate flex-1">{node.name}</span>
+      <span className="text-sm whitespace-nowrap">{node.name}</span>
 
-      {node.url && (
-        <span className="text-xs text-gray-400 truncate max-w-48">
-          {node.url}
+      {displayPath && (
+        <span className="text-xs text-gray-400 whitespace-nowrap">
+          {displayPath}
         </span>
       )}
     </div>

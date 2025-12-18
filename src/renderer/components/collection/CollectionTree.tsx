@@ -39,17 +39,15 @@ export function CollectionTree() {
       </div>
 
       <div className="flex-1 overflow-auto">
-        {treeNodes.map((node) =>
-          node.type === 'folder' ? (
-            <CollectionFolder key={node.id} node={node} depth={0} />
-          ) : (
-            <EndpointItem key={node.id} node={node} depth={0} />
-          )
-        )}
-      </div>
-
-      <div className="mt-3 pt-3 border-t text-sm text-gray-500">
-        {selectedIds.size} of {endpoints.length} endpoints selected
+        <div className="min-w-max">
+          {treeNodes.map((node) =>
+            node.type === 'folder' ? (
+              <CollectionFolder key={node.id} node={node} depth={0} />
+            ) : (
+              <EndpointItem key={node.id} node={node} depth={0} />
+            )
+          )}
+        </div>
       </div>
     </div>
   );

@@ -2,11 +2,11 @@ import { Button } from '@geckoui/geckoui';
 import { useCollection } from '../../context/CollectionContext';
 import { useVariables } from '../../context/VariablesContext';
 import { parseCollection, flattenEndpoints } from '../../utils/postmanParser';
-import { extractAllVariables } from '../../utils/variableExtractor';
+import { extractVariablesWithRequired } from '../../utils/variableExtractor';
 
 export function CollectionImport() {
   const { setCollection } = useCollection();
-  const { setVariables } = useVariables();
+  const { setVariablesFromExtracted } = useVariables();
 
   const handleImport = async () => {
     const result = await window.electronAPI.openFileDialog();
@@ -19,8 +19,8 @@ export function CollectionImport() {
 
     const parsed = parseCollection(result.content);
     const flatEndpoints = flattenEndpoints(parsed.item);
-    const vars = extractAllVariables(flatEndpoints);
-    setVariables(vars);
+    const vars = extractVariablesWithRequired(flatEndpoints);
+    setVariablesFromExtracted(vars);
   };
 
   return (

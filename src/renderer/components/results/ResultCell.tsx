@@ -42,7 +42,7 @@ export function ResultCell({ endpointId, roleId }: ResultCellProps) {
 
   return (
     <td className="px-3 py-2 text-center">
-      <Tooltip content={tooltipContent}>
+      <Tooltip content={tooltipContent} delayDuration={0}>
         <span className="inline-flex items-center justify-center w-6 h-6">
           <StatusIcon status={result.status} />
         </span>

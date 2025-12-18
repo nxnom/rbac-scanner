@@ -4,6 +4,7 @@ import { useResults } from '../../context/ResultsContext';
 import { PUBLIC_ROLE_ID, PUBLIC_ROLE_NAME, METHOD_COLORS } from '../../constants/constants';
 import { ResultCell } from './ResultCell';
 import { classNames } from '../../utils/classNames';
+import { extractPathFromUrl } from '../../utils/variableExtractor';
 import type { FlattenedEndpoint } from '../../types/rbac.types';
 
 interface GroupedEndpoints {
@@ -114,6 +115,7 @@ interface EndpointRowProps {
 
 function EndpointRow({ endpoint, allRoles }: EndpointRowProps) {
   const methodColor = METHOD_COLORS[endpoint.method] ?? '';
+  const displayPath = extractPathFromUrl(endpoint.url);
 
   return (
     <tr className="border-t border-gray-100 hover:bg-gray-50">
@@ -121,8 +123,8 @@ function EndpointRow({ endpoint, allRoles }: EndpointRowProps) {
         <div className="font-medium truncate" title={endpoint.name}>
           {endpoint.name}
         </div>
-        <div className="text-xs text-gray-400 truncate" title={endpoint.url}>
-          {endpoint.url}
+        <div className="text-xs text-gray-400 truncate" title={displayPath}>
+          {displayPath}
         </div>
       </td>
       <td className="px-3 py-2">
