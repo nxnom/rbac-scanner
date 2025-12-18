@@ -18,8 +18,10 @@ export function RolesPanel() {
             >
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{role.name}</p>
-                <p className="text-xs text-gray-400 truncate">
-                  {role.token.substring(0, 20)}...
+                <p className="text-xs text-gray-400 font-mono">
+                  {role.token.length > 20
+                    ? `${role.token.substring(0, 10)}...${role.token.substring(role.token.length - 10)}`
+                    : role.token}
                 </p>
               </div>
               <Button
