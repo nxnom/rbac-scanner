@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useCollection } from '../context/CollectionContext';
 import { useVariables } from '../context/VariablesContext';
 import { useRoles } from '../context/RolesContext';
@@ -15,23 +15,20 @@ import type { ScanStatus, Role, FlattenedEndpoint } from '../types/rbac.types';
 
 const MAX_CONCURRENT_ROWS = 4;
 
-interface ScanProgress {
-  total: number;
-  completed: number;
-}
-
 export function useScanExecutor() {
   const { getSelectedEndpoints } = useCollection();
   const { variables } = useVariables();
   const { roles } = useRoles();
-  const { setResult, clearResults, setScanning, isScanning } = useResults();
+  const {
+    setResult,
+    setScanning,
+    isScanning,
+    incrementCompleted,
+    startNewScan,
+    progress,
+  } = useResults();
 
-  const [isPaused, setIsPaused] = useState(false);
-  const [progress, setProgress] = useState<ScanProgress>({ total: 0, completed: 0 });
-
-  const pausedRef = useRef(false);
-  const scannedIdsRef = useRef<Set<string>>(new Set());
-  const pendingEndpointsRef = useRef<FlattenedEndpoint[]>([]);
+  const currentScanIdRef = useRef(0);
 
   const scanEndpoint = async (endpoint: FlattenedEndpoint, role: Role) => {
     const url = replaceVariables(endpoint.url, variables);
@@ -75,7 +72,11 @@ export function useScanExecutor() {
     }
   };
 
-  const scanRow = async (endpoint: FlattenedEndpoint, allRoles: Role[]) => {
+  const scanRow = async (endpoint: FlattenedEndpoint, allRoles: Role[], scanIdAtStart: number) => {
+    if (currentScanIdRef.current !== scanIdAtStart) {
+      return;
+    }
+
     for (const role of allRoles) {
       setResult(endpoint.id, role.id, {
         endpointId: endpoint.id,
@@ -85,23 +86,25 @@ export function useScanExecutor() {
     }
 
     await Promise.all(allRoles.map((role) => scanEndpoint(endpoint, role)));
-    scannedIdsRef.current.add(endpoint.id);
-    setProgress((prev) => ({ ...prev, completed: prev.completed + 1 }));
+
+    if (currentScanIdRef.current === scanIdAtStart) {
+      incrementCompleted();
+    }
   };
 
-  const runScanLoop = async (endpoints: FlattenedEndpoint[], allRoles: Role[]) => {
+  const runScanLoop = async (endpoints: FlattenedEndpoint[], allRoles: Role[], scanIdAtStart: number) => {
     for (let i = 0; i < endpoints.length; i += MAX_CONCURRENT_ROWS) {
-      if (pausedRef.current) {
-        pendingEndpointsRef.current = endpoints.slice(i);
+      if (currentScanIdRef.current !== scanIdAtStart) {
         return;
       }
 
       const batch = endpoints.slice(i, i + MAX_CONCURRENT_ROWS);
-      await Promise.all(batch.map((endpoint) => scanRow(endpoint, allRoles)));
+      await Promise.all(batch.map((endpoint) => scanRow(endpoint, allRoles, scanIdAtStart)));
     }
 
-    pendingEndpointsRef.current = [];
-    setScanning(false);
+    if (currentScanIdRef.current === scanIdAtStart) {
+      setScanning(false);
+    }
   };
 
   const startScan = () => {
@@ -111,31 +114,18 @@ export function useScanExecutor() {
       return;
     }
 
-    pausedRef.current = false;
-    setIsPaused(false);
-
     const publicRole: Role = { id: PUBLIC_ROLE_ID, name: PUBLIC_ROLE_NAME, token: '' };
     const allRoles = [...roles, publicRole];
 
-    clearResults();
-    scannedIdsRef.current = new Set();
-    pendingEndpointsRef.current = [];
-    setProgress({ total: selectedEndpoints.length, completed: 0 });
-    setScanning(true);
+    const newScanId = startNewScan(selectedEndpoints.length);
+    currentScanIdRef.current = newScanId;
 
-    runScanLoop(selectedEndpoints, allRoles);
-  };
-
-  const pauseScan = () => {
-    pausedRef.current = true;
-    setIsPaused(true);
+    runScanLoop(selectedEndpoints, allRoles, newScanId);
   };
 
   return {
     startScan,
-    pauseScan,
     isScanning,
-    isPaused,
     progress,
   };
 }

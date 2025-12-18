@@ -6,19 +6,11 @@ import { useScanExecutor } from '../../hooks/useScanExecutor';
 
 export function Step3Results() {
   const { prevStep } = useStep();
-  const { startScan, pauseScan, isScanning, progress } = useScanExecutor();
+  const { startScan, isScanning, progress } = useScanExecutor();
 
   useEffect(() => {
     startScan();
   }, []);
-
-  const handleBack = () => {
-    if (isScanning) {
-      pauseScan();
-    }
-
-    prevStep();
-  };
 
   return (
     <div className="flex flex-col h-full">
@@ -37,7 +29,7 @@ export function Step3Results() {
           )}
         </div>
 
-        <Button variant="outlined" onClick={handleBack}>
+        <Button variant="outlined" onClick={prevStep}>
           Back to Setup
         </Button>
       </div>
