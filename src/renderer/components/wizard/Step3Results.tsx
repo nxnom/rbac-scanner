@@ -34,7 +34,7 @@ export function Step3Results() {
         </Button>
       </div>
 
-      <div className="flex-1 p-4 overflow-auto">
+      <div className="flex-1 p-4 overflow-hidden">
         <ResultsTable />
       </div>
     </div>

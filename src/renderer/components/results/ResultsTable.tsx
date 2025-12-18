@@ -47,39 +47,37 @@ export function ResultsTable() {
   const totalColumns = 2 + allRoles.length;
 
   return (
-    <div className="border rounded-lg overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm table-fixed">
-          <thead className="bg-gray-100 sticky top-0">
-            <tr>
-              <th className="px-3 py-2 text-left font-medium text-gray-700 w-64">
-                Endpoint
+    <div className="border rounded-lg overflow-auto h-full">
+      <table className="w-full text-sm table-fixed">
+        <thead className="bg-gray-100 sticky top-0 z-10">
+          <tr>
+            <th className="px-3 py-2 text-left font-medium text-gray-700 w-64">
+              Endpoint
+            </th>
+            <th className="px-3 py-2 text-left font-medium text-gray-700 w-20">
+              Method
+            </th>
+            {allRoles.map((role) => (
+              <th
+                key={role.id}
+                className="px-3 py-2 text-center font-medium text-gray-700 w-24"
+              >
+                {role.name}
               </th>
-              <th className="px-3 py-2 text-left font-medium text-gray-700 w-20">
-                Method
-              </th>
-              {allRoles.map((role) => (
-                <th
-                  key={role.id}
-                  className="px-3 py-2 text-center font-medium text-gray-700 w-24"
-                >
-                  {role.name}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {groupedEndpoints.map((group) => (
-              <GroupSection
-                key={group.folder}
-                group={group}
-                allRoles={allRoles}
-                totalColumns={totalColumns}
-              />
             ))}
-          </tbody>
-        </table>
-      </div>
+          </tr>
+        </thead>
+        <tbody>
+          {groupedEndpoints.map((group) => (
+            <GroupSection
+              key={group.folder}
+              group={group}
+              allRoles={allRoles}
+              totalColumns={totalColumns}
+            />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
