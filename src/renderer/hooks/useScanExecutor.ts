@@ -33,6 +33,7 @@ export function useScanExecutor() {
       const response = await fetch(url, {
         method: endpoint.method,
         headers,
+        redirect: 'manual',
       });
 
       let status: ScanStatus = 'success';
