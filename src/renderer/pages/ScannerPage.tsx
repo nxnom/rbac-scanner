@@ -1,6 +1,5 @@
 import { useStep } from '../context/StepContext';
 import { TopBar } from '../components/layout/TopBar';
-import { StepIndicator } from '../components/wizard/StepIndicator';
 import { Step1SelectAPIs } from '../components/wizard/Step1SelectAPIs';
 import { Step2Configure } from '../components/wizard/Step2Configure';
 import { Step3Results } from '../components/wizard/Step3Results';
@@ -11,7 +10,6 @@ export function ScannerPage() {
   return (
     <div className="flex flex-col h-screen">
       <TopBar />
-      <StepIndicator />
 
       <div className="flex-1 overflow-hidden">
         {currentStep === 1 && <Step1SelectAPIs />}
