@@ -1,14 +1,22 @@
 import { GeckoUIPortal } from '@geckoui/geckoui';
+import { CollectionProvider } from './context/CollectionContext';
+import { VariablesProvider } from './context/VariablesContext';
+import { RolesProvider } from './context/RolesContext';
+import { ResultsProvider } from './context/ResultsContext';
+import { ScannerPage } from './pages/ScannerPage';
 
 function App() {
   return (
-    <>
-      <div className="p-4">
-        <h1 className="text-2xl font-bold">RBAC Scanner</h1>
-        <p className="text-gray-600">Welcome to your application.</p>
-      </div>
-      <GeckoUIPortal />
-    </>
+    <CollectionProvider>
+      <VariablesProvider>
+        <RolesProvider>
+          <ResultsProvider>
+            <ScannerPage />
+            <GeckoUIPortal />
+          </ResultsProvider>
+        </RolesProvider>
+      </VariablesProvider>
+    </CollectionProvider>
   );
 }
 
