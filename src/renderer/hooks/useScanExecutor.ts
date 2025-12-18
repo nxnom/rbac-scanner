@@ -93,14 +93,45 @@ export function useScanExecutor() {
   };
 
   const runScanLoop = async (endpoints: FlattenedEndpoint[], allRoles: Role[], scanIdAtStart: number) => {
-    for (let i = 0; i < endpoints.length; i += MAX_CONCURRENT_ROWS) {
-      if (currentScanIdRef.current !== scanIdAtStart) {
-        return;
-      }
+    let nextIndex = 0;
+    let activeCount = 0;
+    let resolveAll: (() => void) | null = null;
 
-      const batch = endpoints.slice(i, i + MAX_CONCURRENT_ROWS);
-      await Promise.all(batch.map((endpoint) => scanRow(endpoint, allRoles, scanIdAtStart)));
-    }
+    const processNext = async () => {
+      while (nextIndex < endpoints.length && currentScanIdRef.current === scanIdAtStart) {
+        const endpoint = endpoints[nextIndex];
+        nextIndex++;
+        activeCount++;
+
+        scanRow(endpoint, allRoles, scanIdAtStart).then(() => {
+          activeCount--;
+
+          if (currentScanIdRef.current !== scanIdAtStart) {
+            return;
+          }
+
+          if (nextIndex < endpoints.length) {
+            processNext();
+          } else if (activeCount === 0 && resolveAll) {
+            resolveAll();
+          }
+        });
+
+        if (activeCount >= MAX_CONCURRENT_ROWS) {
+          break;
+        }
+      }
+    };
+
+    processNext();
+
+    await new Promise<void>((resolve) => {
+      resolveAll = resolve;
+
+      if (nextIndex >= endpoints.length && activeCount === 0) {
+        resolve();
+      }
+    });
 
     if (currentScanIdRef.current === scanIdAtStart) {
       setScanning(false);
